@@ -15,18 +15,22 @@ class AuthService:
         self._repo = repo
 
     def register(self, username: str, password: str, role: str = "user") -> dict:
+        # Check duplicate username
         if self._repo.get_by_field("username", username):
             raise ValueError("Username already exists")
+
+        # Hash password properly
+        hashed_password = User.hash_password(password)
 
         user = User(
             id=str(uuid.uuid4()),
             username=username,
-            password_hash=User.hash_password(password),
+            password_hash=hashed_password,
             role=role,
         )
 
-        # 🔥 IMPORTANT: use add(), not create()
-        self._repo.add(user)
+        # ✅ IMPORTANT: your repository uses create(), not add()
+        self._repo.create(user)
 
         return user.to_dict()
 
